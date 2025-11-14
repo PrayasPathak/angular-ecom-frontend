@@ -1,9 +1,13 @@
-<div class="bg-white cursor-pointer ruonded-xl shadow-lg flex flex-col overflow-hidden h-full">
+<div
+  class="relative bg-white cursor-pointer ruonded-xl shadow-lg flex flex-col overflow-hidden h-full"
+>
   <img
     [src]="product().imageUrl"
     [alt]="product().name"
     class="w-full h-[360px] object-cover rounded-t-xl"
   />
+
+  <ng-content></ng-content>
 
   <div class="p-6 flex flex-col flex-1">
     <h3 class="text-lg font-semibold to-gray-900 mb-2 leading-tight">{{ product().name }}</h3>

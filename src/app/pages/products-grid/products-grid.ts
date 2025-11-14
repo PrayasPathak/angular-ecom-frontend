@@ -1,10 +1,10 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
-import { Product } from '../../models/product.model';
-import { ProductCard } from '../../components/product-card/product-card';
-import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
-import { MatNavList, MatListItem, MatListItemTitle } from '@angular/material/list';
-import { RouterLink } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
+import { Component, inject, input, signal } from '@angular/core';
+import { MatListItem, MatListItemTitle, MatNavList } from '@angular/material/list';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
+import { RouterLink } from '@angular/router';
+import { ProductCard } from '../../components/product-card/product-card';
+import { ToggleWishlistButton } from '../../components/toggle-wishlist-button/toggle-wishlist-button';
 import { EcommerceStore } from '../../ecommerce-store';
 
 @Component({
@@ -19,6 +19,7 @@ import { EcommerceStore } from '../../ecommerce-store';
     MatListItemTitle,
     RouterLink,
     TitleCasePipe,
+    ToggleWishlistButton,
   ],
   templateUrl: './products-grid.html',
   styleUrl: './products-grid.scss',
