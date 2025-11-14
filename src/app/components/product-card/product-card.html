@@ -1,0 +1,29 @@
+<div class="bg-white cursor-pointer ruonded-xl shadow-lg flex flex-col overflow-hidden h-full">
+  <img
+    [src]="product().imageUrl"
+    [alt]="product().name"
+    class="w-full h-[360px] object-cover rounded-t-xl"
+  />
+
+  <div class="p-6 flex flex-col flex-1">
+    <h3 class="text-lg font-semibold to-gray-900 mb-2 leading-tight">{{ product().name }}</h3>
+    <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ product().description }}</p>
+    <!-- Rating componnet -->
+
+    <div class="text-sm font-medium mb-4">
+      {{ product().inStock ? 'In Stock' : 'Out of Stock' }}
+    </div>
+
+    <div class="flex items-center justify-between mt-auto">
+      <span class="text-2xl font-bold text-gray-900">${{ product().price }}</span>
+      <button
+        matButton="filled"
+        class="flex items-center gap-2"
+        (click)="addToCartClicked.emit(product())"
+      >
+        <mat-icon>shopping_cart</mat-icon>
+        Add to cart
+      </button>
+    </div>
+  </div>
+</div>
