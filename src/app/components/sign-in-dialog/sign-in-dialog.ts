@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogClose, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogClose, MatDialogRef } from '@angular/material/dialog';
 import { MatFormField, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { EcommerceStore } from '../../ecommerce-store';
 import { SignInParams } from '../../models/user.model';
+import { SignUpDialog } from '../sign-up-dialog/sign-up-dialog';
 
 @Component({
   selector: 'app-sign-in-dialog',
@@ -30,6 +31,7 @@ export class SignInDialog {
   store = inject(EcommerceStore);
   data = inject<{ checkout: boolean }>(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
+  matDialog = inject(MatDialog);
 
   signInForm = this.fb.group({
     email: ['john@test.com', [Validators.required]],
@@ -47,8 +49,16 @@ export class SignInDialog {
     this.store.signIn({
       email,
       password,
-      checkout: this.data.checkout,
+      checkout: this.data?.checkout,
       dialogId: this.dialogRef.id,
     } as SignInParams);
+  }
+
+  openSignUpDialog() {
+    this.dialogRef.close();
+    this.matDialog.open(SignUpDialog, {
+      disableClose: true,
+      data: { checkout: this.data?.checkout },
+    });
   }
 }
