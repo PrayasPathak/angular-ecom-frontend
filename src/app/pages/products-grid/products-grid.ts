@@ -1,10 +1,24 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { Product } from '../../models/product.model';
 import { ProductCard } from '../../components/product-card/product-card';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
+import { MatNavList, MatListItem, MatListItemTitle } from '@angular/material/list';
+import { RouterLink } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-products-grid',
-  imports: [ProductCard],
+  imports: [
+    ProductCard,
+    MatSidenavContainer,
+    MatSidenavContent,
+    MatSidenav,
+    MatNavList,
+    MatListItem,
+    MatListItemTitle,
+    RouterLink,
+    TitleCasePipe,
+  ],
   templateUrl: './products-grid.html',
   styleUrl: './products-grid.scss',
 })
@@ -43,7 +57,7 @@ export class ProductsGrid {
       description: 'Waterproof action cam with 4K/60fps recording and image stabilization.',
       price: 129.5,
       imageUrl:
-        'https://media.istockphoto.com/id/2237545311/photo/chinese-photographer-covered-in-colors-at-holi-festival-in-india.webp?a=1&b=1&s=612x612&w=0&k=20&c=ZNyhjXAff7gIqrMaMUiscgD_grbC3coGAKT_zbab0MA=',
+        'https://plus.unsplash.com/premium_photo-1661481839640-1da91006f710?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjF8fHVsdHJhJTIwNGslMjBhY3Rpb24lMjBjYW1lcmF8ZW58MHx8MHx8fDA%3D',
       rating: 4.1,
       reviewCount: 442,
       inStock: false,
@@ -134,10 +148,79 @@ export class ProductsGrid {
       inStock: false,
       category: 'electronics',
     },
+    {
+      id: 'p11',
+      name: 'Leather Wristwatch',
+      description: 'A classic leather wristwatch with a minimalist dial and durable strap.',
+      price: 89.99,
+      imageUrl:
+        'https://images.unsplash.com/photo-1663426752652-b696d57f78ef?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGxlYXRoZXIlMjB3cmlzdCUyMHdhdGNofGVufDB8fDB8fHww',
+      rating: 4.5,
+      reviewCount: 134,
+      inStock: true,
+      category: 'accessories',
+    },
+    {
+      id: 'p12',
+      name: 'Silk Scarf',
+      description: 'Lightweight and stylish silk scarf perfect for any season.',
+      price: 29.99,
+      imageUrl:
+        'https://images.unsplash.com/photo-1670490340295-95b418fe59a4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHNpbGslMjBzY2FyZnxlbnwwfHwwfHx8MA%3D%3D',
+      rating: 4.2,
+      reviewCount: 58,
+      inStock: true,
+      category: 'accessories',
+    },
+    {
+      id: 'p13',
+      name: 'Aromatic Soy Candle',
+      description: 'Hand-poured soy candle with a calming lavender scent.',
+      price: 14.99,
+      imageUrl:
+        'https://images.unsplash.com/photo-1651795426376-0e6adfd01f00?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YXJvbWF0aWMlMjBzb3klMjBjYW5kbGV8ZW58MHx8MHx8fDA%3D',
+      rating: 4.8,
+      reviewCount: 210,
+      inStock: true,
+      category: 'home',
+    },
+    {
+      id: 'p14',
+      name: 'Decorative Throw Pillow',
+      description: 'Soft, textured pillow that adds charm to any living space.',
+      price: 24.99,
+      imageUrl:
+        'https://images.unsplash.com/photo-1761206887095-e57f9ae4a06f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVjb3JhdGl2ZSUyMHRocm93JTIwcGlsbG93fGVufDB8fDB8fHww',
+      rating: 4.4,
+      reviewCount: 92,
+      inStock: false,
+      category: 'home',
+    },
+    {
+      id: 'p15',
+      name: 'Bamboo Wall Clock',
+      description: 'Eco-friendly wall clock crafted from natural bamboo.',
+      price: 39.99,
+      imageUrl:
+        'https://images.unsplash.com/photo-1558603655-491ecfa8324f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2FsbCUyMGNsb2NrfGVufDB8fDB8fHww',
+      rating: 4.7,
+      reviewCount: 76,
+      inStock: true,
+      category: 'home',
+    },
   ]);
 
   filteredProducts = computed(() => {
     if (this.category() === 'all') return this.products();
     return this.products().filter((p) => p.category === this.category().toLowerCase());
   });
+
+  categories = signal<string[]>([
+    'all',
+    'electronics',
+    'clothes',
+    'fitness',
+    'accessories',
+    'home',
+  ]);
 }
