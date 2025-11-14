@@ -11,12 +11,17 @@ import { produce } from 'immer';
 import { CartItem } from './models/cart.model';
 import { Product } from './models/product.model';
 import { Toaster } from './services/toaster';
+import { MatDialog } from '@angular/material/dialog';
+import { SignInDialog } from './components/sign-in-dialog/sign-in-dialog';
+import { SignInParams, User } from './models/user.model';
+import { Router } from '@angular/router';
 
 export type EcommerceState = {
   products: Product[];
   category: string;
   wishlistItems: Product[];
   cartItems: CartItem[];
+  user: User | undefined;
 };
 
 export const EcommerceStore = signalStore(
@@ -209,6 +214,7 @@ export const EcommerceStore = signalStore(
     category: 'all',
     wishlistItems: [],
     cartItems: [],
+    user: undefined,
   } as EcommerceState),
   withComputed(({ category, products, wishlistItems, cartItems }) => ({
     filteredProducts: computed(() => {
@@ -219,80 +225,108 @@ export const EcommerceStore = signalStore(
     wishlistCount: computed(() => wishlistItems().length),
     cartCount: computed(() => cartItems().reduce((acc, item) => acc + item.quantity, 0)),
   })),
-  withMethods((store, toaster = inject(Toaster)) => ({
-    setCategory: signalMethod<string>((category: string) => {
-      patchState(store, { category });
-    }),
-    addToWishlist: (product: Product) => {
-      const updateWishlistItems = produce(store.wishlistItems(), (draft) => {
-        if (!draft.find((p) => p.id === product.id)) draft.push(product);
-      });
+  withMethods(
+    (store, toaster = inject(Toaster), matDialog = inject(MatDialog), router = inject(Router)) => ({
+      setCategory: signalMethod<string>((category: string) => {
+        patchState(store, { category });
+      }),
+      addToWishlist: (product: Product) => {
+        const updateWishlistItems = produce(store.wishlistItems(), (draft) => {
+          if (!draft.find((p) => p.id === product.id)) draft.push(product);
+        });
 
-      patchState(store, { wishlistItems: updateWishlistItems });
-      toaster.success('Product added to wishlist');
-    },
+        patchState(store, { wishlistItems: updateWishlistItems });
+        toaster.success('Product added to wishlist');
+      },
 
-    removeFromWishlist: (product: Product) => {
-      patchState(store, {
-        wishlistItems: store.wishlistItems().filter((p) => p.id !== product.id),
-      });
-      toaster.success('Product removed from wishlist');
-    },
+      removeFromWishlist: (product: Product) => {
+        patchState(store, {
+          wishlistItems: store.wishlistItems().filter((p) => p.id !== product.id),
+        });
+        toaster.success('Product removed from wishlist');
+      },
 
-    clearWishlist: () => {
-      patchState(store, { wishlistItems: [] });
-    },
+      clearWishlist: () => {
+        patchState(store, { wishlistItems: [] });
+      },
 
-    addToCart: (product: Product, quantity = 1) => {
-      const existingItemIndex = store.cartItems().findIndex((p) => p.product.id === product.id);
+      addToCart: (product: Product, quantity = 1) => {
+        const existingItemIndex = store.cartItems().findIndex((p) => p.product.id === product.id);
 
-      const updatedCartItems = produce(store.cartItems(), (draft) => {
-        if (existingItemIndex !== -1) {
-          draft[existingItemIndex].quantity += quantity;
-        } else {
-          draft.push({ product, quantity });
-        }
-      });
-
-      patchState(store, { cartItems: updatedCartItems });
-
-      toaster.success(existingItemIndex !== -1 ? 'Product added again' : 'Product added to cart');
-    },
-
-    setItemQuantity: (params: { productId: string; quantity: number }) => {
-      const index = store.cartItems().findIndex((c) => c.product.id === params.productId);
-      const updated = produce(store.cartItems(), (draft) => {
-        draft[index].quantity = params.quantity;
-      });
-
-      patchState(store, { cartItems: updated });
-    },
-
-    addAllWishlistToCart: () => {
-      const updatedCartItems = produce(store.cartItems(), (draft) => {
-        store.wishlistItems().forEach((p) => {
-          if (!draft.find((c) => c.product.id === p.id)) {
-            draft.push({ product: p, quantity: 1 });
+        const updatedCartItems = produce(store.cartItems(), (draft) => {
+          if (existingItemIndex !== -1) {
+            draft[existingItemIndex].quantity += quantity;
+          } else {
+            draft.push({ product, quantity });
           }
         });
-      });
-      patchState(store, { cartItems: updatedCartItems, wishlistItems: [] });
-    },
 
-    moveToWishlist: (product: Product) => {
-      const updatedCartItems = store.cartItems().filter((p) => p.product.id !== product.id);
-      const updatedWishlistItems = produce(store.wishlistItems(), (draft) => {
-        if (!draft.find((p) => p.id === product.id)) {
-          draft.push(product);
+        patchState(store, { cartItems: updatedCartItems });
+
+        toaster.success(existingItemIndex !== -1 ? 'Product added again' : 'Product added to cart');
+      },
+
+      setItemQuantity: (params: { productId: string; quantity: number }) => {
+        const index = store.cartItems().findIndex((c) => c.product.id === params.productId);
+        const updated = produce(store.cartItems(), (draft) => {
+          draft[index].quantity = params.quantity;
+        });
+
+        patchState(store, { cartItems: updated });
+      },
+
+      addAllWishlistToCart: () => {
+        const updatedCartItems = produce(store.cartItems(), (draft) => {
+          store.wishlistItems().forEach((p) => {
+            if (!draft.find((c) => c.product.id === p.id)) {
+              draft.push({ product: p, quantity: 1 });
+            }
+          });
+        });
+        patchState(store, { cartItems: updatedCartItems, wishlistItems: [] });
+      },
+
+      moveToWishlist: (product: Product) => {
+        const updatedCartItems = store.cartItems().filter((p) => p.product.id !== product.id);
+        const updatedWishlistItems = produce(store.wishlistItems(), (draft) => {
+          if (!draft.find((p) => p.id === product.id)) {
+            draft.push(product);
+          }
+        });
+        patchState(store, { cartItems: updatedCartItems, wishlistItems: updatedWishlistItems });
+      },
+
+      removeFromCart: (product: Product) => {
+        patchState(store, {
+          cartItems: store.cartItems().filter((c) => c.product.id !== product.id),
+        });
+      },
+
+      proceedToCheckout: () => {
+        matDialog.open(SignInDialog, {
+          disableClose: true,
+          data: {
+            checkout: true,
+          },
+        });
+      },
+
+      signIn: ({ email, password, checkout, dialogId }: SignInParams) => {
+        patchState(store, {
+          user: {
+            id: '1',
+            email,
+            name: 'John Doe',
+            imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
+          },
+        });
+
+        const dialog = matDialog.getDialogById(dialogId)?.close();
+
+        if (checkout) {
+          router.navigate(['/checkout']);
         }
-      });
-      patchState(store, { cartItems: updatedCartItems, wishlistItems: updatedWishlistItems });
-    },
-
-    removeFromCart: (product: Product) => {
-      patchState(store, {
-        cartItems: store.cartItems().filter((c) => c.product.id !== product.id),
-      });
-    },
-  }))
+      },
+    })
+  )
 );
